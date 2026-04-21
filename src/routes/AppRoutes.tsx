@@ -48,6 +48,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/pots"
+        element={
+          <ProtectedRoute>
+            <Savings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/recurring-costs"
         element={
           <ProtectedRoute>

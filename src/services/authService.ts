@@ -5,7 +5,9 @@ type StoredUser = AuthUser & {
   password: string;
 };
 
-let users: StoredUser[] = [
+const usersStorageKey = "finance.auth.users";
+
+const defaultUsers: StoredUser[] = [
   {
     id: "demo-user",
     fullName: "Demo User",
@@ -13,6 +15,29 @@ let users: StoredUser[] = [
     password: "Password123",
   },
 ];
+
+const loadUsers = (): StoredUser[] => {
+  const stored = window.localStorage.getItem(usersStorageKey);
+
+  if (!stored) {
+    window.localStorage.setItem(usersStorageKey, JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+
+  try {
+    const parsed = JSON.parse(stored) as StoredUser[];
+    return parsed.length > 0 ? parsed : defaultUsers;
+  } catch {
+    window.localStorage.setItem(usersStorageKey, JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+};
+
+const persistUsers = (nextUsers: StoredUser[]) => {
+  window.localStorage.setItem(usersStorageKey, JSON.stringify(nextUsers));
+};
+
+let users: StoredUser[] = loadUsers();
 
 const buildUser = (data: Pick<AuthUser, "fullName" | "email">): AuthUser => ({
   id: `user-${Date.now()}`,
@@ -70,6 +95,7 @@ export const authService = {
     };
 
     users = [...users, nextUser];
+    persistUsers(users);
 
     return {
       id: nextUser.id,
